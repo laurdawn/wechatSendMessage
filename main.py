@@ -1,12 +1,10 @@
 import win32gui, win32con, win32api
 import time, datetime
-from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.blocking import BlockingScheduler
 
 #不使用守护线程  
-schedudler = BlockingScheduler()
-task_list = [("09:21", "do A"),
-             ("02:36", "do B"),
-             ("21:27", "do C")]
+# schedudler = BlockingScheduler()
+
 
 
 def getCurTime():
@@ -48,7 +46,7 @@ def sendMessage(message):
     print(getCurTime(), "激活输入框")
     win32api.SetCursorPos((200 + 700, 100 + 550))
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP | win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    print(getCurTime(), "输入信息。。。")
+    print(getCurTime(), "输入信息：", message)
     for c in message:
         win32api.SendMessage(handle, win32con.WM_CHAR, ord(c), 0)
     #回车
@@ -57,15 +55,25 @@ def sendMessage(message):
     #发送完信息隐藏窗口
     time.sleep(1)
     win32gui.ShowWindow(handle, win32con.SW_HIDE)
+    print(getCurTime(), "隐藏窗口，进入休眠")
 
-#这里因为不知道哪里丢失开始8个字符，这里先随机填空8个字符，再正式输出
-# sendMessage("微信通知")
-
-
-def job():
-    print(getCurTime())
-    sendMessage("微信通知")
-    time.sleep(2)
+def getWeekDay():
+    return datetime.datetime.now().weekday() + 1
 # schedudler.add_job(job, 'cron', day_of_week="0-4", hour=8, minute=55)
-schedudler.add_job(job, 'cron', day_of_week="0-4", hour=15, minute=26)
-schedudler.start()
+# schedudler.add_job(job, 'cron', day_of_week="0-4", hour=15, minute=26)
+# schedudler.start()
+
+task_list = [([1, 2, 3, 4, 5], "08:55:00", "考勤自动通知：微信上班打卡"),
+             ([1, 2, 3, 4, 5], "17:05:00", "考勤自动通知：微信下班打卡")]
+task_test_list = [([1, 2, 4, 5], "09:24:30", "restetset"),
+            ([1, 2, 3, 4, 5], "09:24:00", "hahahahahhahaha")]
+
+while True:
+    for task in task_test_list:
+        week_day = task[0]
+        if getWeekDay() in week_day:
+            task_time = task[1]
+            task_content = task[2]
+            curTime = datetime.datetime.now().strftime("%H:%M:%S")
+            if curTime == task_time:
+                sendMessage(task_content)
