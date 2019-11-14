@@ -1,5 +1,6 @@
 import win32gui, win32con, win32api
 import time, datetime
+import pyperclip
 # from apscheduler.schedulers.blocking import BlockingScheduler
 
 #不使用守护线程  
@@ -40,16 +41,23 @@ def sendMessage(message):
         return
     #置顶窗口
     print(getCurTime(), "置顶窗口")
-    win32gui.ShowWindow(handle, win32con.SWP_SHOWWINDOW)
+    win32gui.ShowWindow(handle, win32con.SW_SHOWNORMAL)
     win32gui.SetWindowPos(handle, win32con.HWND_TOPMOST, 200,100,1000,600, win32con.SWP_SHOWWINDOW)
-    time.sleep(2)
+    time.sleep(1)
     print(getCurTime(), "激活输入框")
+    #鼠标激活窗口
     win32api.SetCursorPos((200 + 700, 100 + 550))
     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP | win32con.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0)
-    print(getCurTime(), "输入信息：", message)
-    for c in message:
-        win32api.SendMessage(handle, win32con.WM_CHAR, ord(c), 0)
+    pyperclip.copy(message)
+    win32api.keybd_event(17,0,0,0)  #ctrl键位码是17
+    win32api.keybd_event(86,0,0,0)  #v键位码是86
+    win32api.keybd_event(86,0,win32con.KEYEVENTF_KEYUP,0) #释放按键
+    win32api.keybd_event(17,0,win32con.KEYEVENTF_KEYUP,0)
+    # print(getCurTime(), "输入信息：", message)
+    # for c in message:
+    #     win32api.SendMessage(handle, win32con.WM_CHAR, ord(c), 0)
     #回车
+    time.sleep(1)
     win32gui.PostMessage(handle,win32con.WM_KEYDOWN,win32con.VK_RETURN,0)
     win32gui.PostMessage(handle,win32con.WM_KEYUP,win32con.VK_RETURN,0)
     #发送完信息隐藏窗口
@@ -65,9 +73,9 @@ def getWeekDay():
 
 task_list = [([1, 2, 3, 4, 5], "08:55:00", "考勤自动通知：微信上班打卡"),
              ([1, 2, 3, 4, 5], "17:05:00", "考勤自动通知：微信下班打卡")]
-task_test_list = [([1, 2, 4, 5], "09:24:30", "restetset"),
-            ([1, 2, 3, 4, 5], "09:24:00", "hahahahahhahaha")]
-
+task_test_list = [([1, 2, 4, 5], "10:18:30", "restetset"),
+            ([1, 2, 3, 4, 5], "10:19:00", "hahahahahhahaha")]
+sendMessage("微信机器人定时消息推送已启动。。。")
 while True:
     for task in task_test_list:
         week_day = task[0]
